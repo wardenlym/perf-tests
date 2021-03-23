@@ -2,12 +2,12 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
   namespace: probes
-  name: prometheus-k8s
+  name: kube-prometheus-stack-prometheus
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
-  name: prometheus-k8s
+  name: kube-prometheus-stack-prometheus
 subjects:
   - kind: ServiceAccount
-    name: prometheus-k8s
+    name: kube-prometheus-stack-prometheus
     namespace: monitoring

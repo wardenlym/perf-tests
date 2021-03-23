@@ -66,6 +66,7 @@ type ModifierConfig struct {
 
 // PrometheusConfig represents all flags used by prometheus.
 type PrometheusConfig struct {
+	UseKubePrometheusStack  bool
 	EnableServer            bool
 	TearDownServer          bool
 	ScrapeEtcd              bool

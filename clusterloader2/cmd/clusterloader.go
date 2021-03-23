@@ -268,7 +268,8 @@ func main() {
 
 	var prometheusController *prometheus.Controller
 	var prometheusFramework *framework.Framework
-	if clusterLoaderConfig.PrometheusConfig.EnableServer {
+	if clusterLoaderConfig.PrometheusConfig.EnableServer ||
+		clusterLoaderConfig.PrometheusConfig.UseKubePrometheusStack {
 		// Pass overrides to prometheus controller
 		clusterLoaderConfig.TestScenario.OverridePaths = testOverridePaths
 		if prometheusController, err = prometheus.NewController(&clusterLoaderConfig); err != nil {

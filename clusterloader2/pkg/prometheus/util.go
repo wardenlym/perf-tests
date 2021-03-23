@@ -53,7 +53,8 @@ func CheckAllTargetsReady(k8sClient kubernetes.Interface, selector func(Target) 
 func CheckTargetsReady(k8sClient kubernetes.Interface, selector func(Target) bool, minActiveTargets, minReadyTargets int) (bool, error) {
 	raw, err := k8sClient.CoreV1().
 		Services(namespace).
-		ProxyGet("http", "prometheus-k8s", "9090", "api/v1/targets", nil /*params*/).
+		//ProxyGet("http", "prometheus-k8s", "9090", "api/v1/targets", nil /*params*/).
+		ProxyGet("http", "kube-prometheus-stack-prometheus", "9090", "api/v1/targets", nil /*params*/).
 		DoRaw(context.TODO())
 	if err != nil {
 		response := "(empty)"

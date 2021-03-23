@@ -50,6 +50,7 @@ const (
 
 // InitFlags initializes prometheus flags.
 func InitFlags(p *config.PrometheusConfig) {
+	flags.BoolEnvVar(&p.UseKubePrometheusStack, "use-kube-prometheus-stack", "USE_KUBE_PROMETHEUS_STACK", false, "Whether to use the kube-prometheus-stack already deployed in the cluster.")
 	flags.BoolEnvVar(&p.EnableServer, "enable-prometheus-server", "ENABLE_PROMETHEUS_SERVER", false, "Whether to set-up the prometheus server in the cluster.")
 	flags.BoolEnvVar(&p.TearDownServer, "tear-down-prometheus-server", "TEAR_DOWN_PROMETHEUS_SERVER", true, "Whether to tear-down the prometheus server after tests (if set-up).")
 	flags.BoolEnvVar(&p.ScrapeEtcd, "prometheus-scrape-etcd", "PROMETHEUS_SCRAPE_ETCD", false, "Whether to scrape etcd metrics.")
@@ -160,6 +161,11 @@ func (pc *Controller) SetUpPrometheusStack() error {
 	k8sClient := pc.framework.GetClientSets().GetClient()
 
 	klog.Info("Setting up prometheus stack")
+	if pc.clusterLoaderConfig.PrometheusConfig.UseKubePrometheusStack {
+		klog.Info("Using deployed kube-prometheus-stack, set up skipped")
+		return nil
+	}
+
 	if err := client.CreateNamespace(k8sClient, namespace); err != nil {
 		return err
 	}
@@ -208,6 +214,12 @@ func (pc *Controller) SetUpPrometheusStack() error {
 
 // TearDownPrometheusStack tears down prometheus stack, releasing all prometheus resources.
 func (pc *Controller) TearDownPrometheusStack() error {
+
+	if pc.clusterLoaderConfig.PrometheusConfig.UseKubePrometheusStack {
+		klog.Info("Using deployed kube-prometheus-stack, tear down skipped")
+		return nil
+	}
+
 	// Get disk metadata again to be sure
 	if err := pc.cachePrometheusDiskMetadataIfEnabled(); err != nil {
 		klog.Warningf("Error while caching prometheus disk metadata: %v", err)
@@ -333,6 +345,7 @@ func (pc *Controller) isPrometheusReady() (bool, error) {
 	// targets are registered. These 4 targets are always expected, in all possible configurations:
 	// prometheus, prometheus-operator, grafana, apiserver
 	expectedTargets := 4
+	klog.Infof("######################## is isPrometheusReady")
 	if pc.clusterLoaderConfig.PrometheusConfig.ScrapeEtcd {
 		// If scraping etcd is enabled (or it's kubemark where we scrape etcd unconditionally) we need
 		// a bit more complicated logic to asses whether all targets are ready. Etcd metric port has
@@ -369,7 +382,9 @@ func (pc *Controller) isKubemark() bool {
 
 func dumpAdditionalLogsOnPrometheusSetupFailure(k8sClient kubernetes.Interface) {
 	klog.Info("Dumping monitoring/prometheus-k8s events...")
-	list, err := client.ListEvents(k8sClient, namespace, "prometheus-k8s")
+	//list, err := client.ListEvents(k8sClient, namespace, "prometheus-k8s")
+	list, err := client.ListEvents(k8sClient, namespace, "kube-prometheus-stack-prometheus")
+
 	if err != nil {
 		klog.Warningf("Error while listing monitoring/prometheus-k8s events: %v", err)
 		return

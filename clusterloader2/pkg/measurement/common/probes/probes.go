@@ -35,7 +35,8 @@ import (
 const (
 	probesNamespace = "probes"
 
-	manifestsPathPrefix = "$GOPATH/src/k8s.io/perf-tests/clusterloader2/pkg/measurement/common/probes/manifests/"
+	//manifestsPathPrefix = "$GOPATH/src/k8s.io/perf-tests/clusterloader2/pkg/measurement/common/probes/manifests/"
+	manifestsPathPrefix = "/home/ubuntu/clusterloader2/pkg/measurement/common/probes/manifests/"
 
 	checkProbesReadyInterval = 15 * time.Second
 
@@ -98,6 +99,7 @@ type probesMeasurement struct {
 // - start - starts probes and sets up monitoring
 // - gather - Gathers and prints metrics.
 func (p *probesMeasurement) Execute(config *measurement.Config) ([]measurement.Summary, error) {
+	return nil, nil
 	if config.CloudProvider == "kubemark" {
 		klog.Infof("%s: Probes cannot work in Kubemark, skipping the measurement!", p)
 		return nil, nil
@@ -246,6 +248,7 @@ func (p *probesMeasurement) checkProbesReady() (bool, error) {
 		return false
 	}
 	expectedTargets := p.replicasPerProbe * len(p.config.ProbeLabelValues)
+	klog.Infof("######################## is probe CheckAllTargetsReady")
 	return prometheus.CheckAllTargetsReady(
 		p.framework.GetClientSets().GetClient(), selector, expectedTargets)
 }

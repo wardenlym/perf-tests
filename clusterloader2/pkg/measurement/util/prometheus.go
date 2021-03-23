@@ -110,7 +110,8 @@ func (e *PrometheusQueryExecutor) Query(query string, queryTime time.Time) ([]*m
 	if err := wait.PollImmediate(queryInterval, queryTimeout, func() (bool, error) {
 		body, queryErr = e.client.CoreV1().
 			Services("monitoring").
-			ProxyGet("http", "prometheus-k8s", "9090", "api/v1/query", params).
+			//ProxyGet("http", "prometheus-k8s", "9090", "api/v1/query", params).
+			ProxyGet("http", "kube-prometheus-stack-prometheus", "9090", "api/v1/query", params).
 			DoRaw(context.TODO())
 		if queryErr != nil {
 			return false, nil
